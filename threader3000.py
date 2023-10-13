@@ -32,10 +32,15 @@ def main():
     print("                   A project by The Mayor               ")
     print("-" * 60)
     time.sleep(1)
+    v6 = input("Would you like to scan IPv6 addresses? (y/n): ")
+    v6 = (v6=='y' or v6=='Y')
     target = input("Enter your target IP address or URL here: ")
     error = ("Invalid Input")
     try:
-        t_ip = socket.gethostbyname(target)
+        if(v6):
+           t_ip = socket.getaddrinfo(target, None, socket.AF_INET6)[0][4][0]
+        else:
+           t_ip = socket.gethostbyname(target)
     except (UnboundLocalError, socket.gaierror):
         print("\n[-]Invalid format. Please use a correct IP or web address[-]\n")
         sys.exit()
@@ -47,11 +52,13 @@ def main():
     t1 = datetime.now()
 
     def portscan(port):
-
-       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+       if v6:
+         s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+       else:
+          s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
        
        try:
-          portx = s.connect((t_ip, port))
+          portx = s.connect((str(t_ip), port))
           with print_lock:
              print("Port {} is open".format(port))
              discovered_ports.append(str(port))
